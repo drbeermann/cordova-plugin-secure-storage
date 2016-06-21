@@ -78,6 +78,10 @@ SecureStorageiOS.prototype = {
 SecureStorageAndroid = function (service, options) {
     var self = this;
 
+    this.options = {
+        native: true
+    };
+
     if (options) {
         this.options = _merge_options(this.options, options);
     }
@@ -88,9 +92,6 @@ SecureStorageAndroid = function (service, options) {
 };
 
 SecureStorageAndroid.prototype = {
-    options: {
-        native: true
-    },
 
     init: function(success, error) {
 
@@ -98,8 +99,8 @@ SecureStorageAndroid.prototype = {
             _checkCallbacks(success, error);
             cordova.exec(
                 function (native_aes_supported) {
-                    self.options.native = native_aes_supported && self.options.native;
-                    if (!self.options.native){
+                    this.options.native = native_aes_supported && this.options.native;
+                    if (!this.options.native){
                         success();
                     } else {
                         if (!localStorage.getItem('_SS_MIGRATED_TO_NATIVE')) {
