@@ -34,13 +34,19 @@ var _merge_options = function (defaults, options){
     return res;
 };
 
-SecureStorageiOS = function (success, error, service) {
+SecureStorageiOS = function (service) {
     this.service = service;
-    setTimeout(success, 0);
+
     return this;
 };
 
 SecureStorageiOS.prototype = {
+
+    init: function(success, error) {
+
+        setTimeout(success, 0);
+    },
+
     get: function (success, error, key) {
         try {
             _checkCallbacks(success, error);
@@ -69,7 +75,7 @@ SecureStorageiOS.prototype = {
     }
 };
 
-SecureStorageAndroid = function (success, error, service, options) {
+SecureStorageAndroid = function (service, options) {
     var self = this;
 
     if (options) {
@@ -77,35 +83,40 @@ SecureStorageAndroid = function (success, error, service, options) {
     }
 
     this.service = service;
-    try {
-        _checkCallbacks(success, error);
-        cordova.exec(
-            function (native_aes_supported) {
-                self.options.native = native_aes_supported && self.options.native;
-                if (!self.options.native){
-                    success();
-                } else {
-                    if (!localStorage.getItem('_SS_MIGRATED_TO_NATIVE')) {
-                        self._migrate_to_native(success);
-                    } else {
-                        success();
-                    }
-                }
-            },
-            error,
-            'SecureStorage',
-            'init',
-            [this.service]
-        );
-    } catch (e) {
-        error(e);
-    }
+    
     return this;
 };
 
 SecureStorageAndroid.prototype = {
     options: {
         native: true
+    },
+
+    init: function(success, error) {
+
+        try {
+            _checkCallbacks(success, error);
+            cordova.exec(
+                function (native_aes_supported) {
+                    self.options.native = native_aes_supported && self.options.native;
+                    if (!self.options.native){
+                        success();
+                    } else {
+                        if (!localStorage.getItem('_SS_MIGRATED_TO_NATIVE')) {
+                            self._migrate_to_native(success);
+                        } else {
+                            success();
+                        }
+                    }
+                },
+                error,
+                'SecureStorage',
+                'init',
+                [this.service]
+            );
+        } catch (e) {
+            error(e);
+        }
     },
 
     get: function (success, error, key) {
@@ -127,6 +138,18 @@ SecureStorageAndroid.prototype = {
     remove: function (success, error, key) {
         localStorage.removeItem('_SS_' + key);
         success(key);
+    },
+
+    isKeyguardSecure: function(success, error) {
+
+        cordova.exec(
+            function (val) {
+                success(val);
+            },
+            function (err) {
+                error(err);
+            },
+            "SecureStorage", "isKeyguardSecure", []);
     },
 
     _sjcl_get: function (success, error, key) {
@@ -284,13 +307,18 @@ SecureStorageAndroid.prototype = {
     }
 };
 
-SecureStorageBrowser = function (success, error, service) {
+SecureStorageBrowser = function (service) {
     this.service = service;
-    setTimeout(success, 0);
+    
     return this;
 };
 
 SecureStorageBrowser.prototype = {
+
+    init: function(success, error) {
+
+        setTimeout(success, 0);
+    },
 
     get: function (success, error, key) {
         var value;

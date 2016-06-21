@@ -1,5 +1,6 @@
 package com.crypho.plugins;
 
+import android.app.KeyguardManager;
 import android.util.Log;
 import android.util.Base64;
 import android.os.Build;
@@ -126,6 +127,12 @@ public class SecureStorage extends CordovaPlugin {
                 }
             });
             return true;
+        }
+        if ("isKeyguardSecure".equals(action)) {
+
+            KeyguardManager km = (KeyguardManager) cordova.getActivity().getSystemService(Context.KEYGUARD_SERVICE);
+
+            callbackContext.success(km.isKeyguardSecure() ? 1 : 0);
         }
         return false;
     }
