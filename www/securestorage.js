@@ -95,12 +95,14 @@ SecureStorageAndroid.prototype = {
 
     init: function(success, error) {
 
+        var options = this.options;
+
         try {
             _checkCallbacks(success, error);
             cordova.exec(
                 function (native_aes_supported) {
-                    this.options.native = native_aes_supported && this.options.native;
-                    if (!this.options.native){
+                    options.native = native_aes_supported && options.native;
+                    if (!options.native){
                         success();
                     } else {
                         if (!localStorage.getItem('_SS_MIGRATED_TO_NATIVE')) {
