@@ -95,6 +95,7 @@ SecureStorageAndroid.prototype = {
 
     init: function(success, error) {
 
+        var self = this;
         var options = this.options;
 
         try {
