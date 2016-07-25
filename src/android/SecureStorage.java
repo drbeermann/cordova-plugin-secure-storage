@@ -132,7 +132,17 @@ public class SecureStorage extends CordovaPlugin {
 
             KeyguardManager km = (KeyguardManager) cordova.getActivity().getSystemService(Context.KEYGUARD_SERVICE);
 
-            callbackContext.success(km.isKeyguardSecure() ? 1 : 0);
+            boolean secure = km.isKeyguardSecure();
+
+            if (secure) {
+
+                // https://github.com/Crypho/cordova-plugin-secure-storage/issues/23
+                // We can't use lower API levels for secure storage because the API
+                // doesn't support it.
+                secure = secure && (android.os.Build.VERSION.SDK_INT >= 19);
+            }
+
+            callbackContext.success(secure ? 1 : 0);
         }
         return false;
     }
