@@ -361,6 +361,10 @@ SecureStorageBrowser.prototype = {
     remove: function (success, error, key) {
         localStorage.removeItem('_SS_' + key);
         success(key);
+    },
+    isKeyguardSecure: function(success, error) {
+
+        success(true);
     }
 };
 
