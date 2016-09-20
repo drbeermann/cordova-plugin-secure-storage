@@ -72,6 +72,16 @@ SecureStorageiOS.prototype = {
         } catch (e) {
             error(e);
         }
+    },
+
+    isKeyguardSecure: function(success, error) {
+
+        try {
+            _checkCallbacks(success, error);
+            cordova.exec(success, error, 'SecureStorage', 'isKeyguardSecure');
+        } catch (e) {
+            error(e);
+        }
     }
 };
 

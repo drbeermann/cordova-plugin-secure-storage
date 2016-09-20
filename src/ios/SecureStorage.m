@@ -8,6 +8,9 @@
 
 @synthesize keychainAccesssibilityMapping;
 
+NSString * const UIDevicePasscodeKeychainService = @"UIDevice-PasscodeStatus_KeychainService";
+NSString * const UIDevicePasscodeKeychainAccount = @"UIDevice-PasscodeStatus_KeychainAccount";
+
 - (void)get:(CDVInvokedUrlCommand*)command
 {
     NSString *service = [command argumentAtIndex:0];
@@ -98,6 +101,102 @@
             [self failWithMessage: @"Failure in SecureStorage.get()" : error : command.callbackId];
         }
     }];
+}
+
+// FROM https://github.com/liamnichols/UIDevice-PasscodeStatus/blob/master/Source/UIDevice%2BPasscodeStatus.m
+//  Created by Liam Nichols on 02/09/2014.
+//  Copyright (c) 2014 Liam Nichols. All rights reserved.
+/*
+ The MIT License (MIT)
+ 
+ Copyright (c) 2014 Liam Nichols
+ 
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+ 
+ The above copyright notice and this permission notice shall be included in all
+ copies or substantial portions of the Software.
+ 
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+*/
+- (void) isKeyguardSecure:(CDVInvokedUrlCommand*)command
+{
+    
+#if TARGET_IPHONE_SIMULATOR
+    NSLog(@"-[%@ %@] - not supported in simulator", NSStringFromClass([self class]), NSStringFromSelector(_cmd));
+    [self successWithBoolean: NO : command.callbackId];
+    return;
+#endif
+        
+    static NSData *password = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        password = [NSKeyedArchiver archivedDataWithRootObject:NSStringFromSelector(_cmd)];
+    });
+    
+    NSDictionary *query = @{
+                            (__bridge id)kSecClass: (__bridge id)kSecClassGenericPassword,
+                            (__bridge id)kSecAttrService: UIDevicePasscodeKeychainService,
+                            (__bridge id)kSecAttrAccount: UIDevicePasscodeKeychainAccount,
+                            (__bridge id)kSecReturnData: @YES,
+                            };
+    
+    CFErrorRef sacError = NULL;
+    SecAccessControlRef sacObject;
+    sacObject = SecAccessControlCreateWithFlags(kCFAllocatorDefault, kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly, kNilOptions, &sacError);
+    
+    // unable to create the access control item.
+    if (sacObject == NULL || sacError != NULL) {
+        
+        [self successWithBoolean: NO : command.callbackId];
+        return;
+    }
+    
+    
+    NSMutableDictionary *setQuery = [query mutableCopy];
+    setQuery[(__bridge id) kSecValueData] = password;
+    setQuery[(__bridge id) kSecAttrAccessControl] = (__bridge id) sacObject;
+    
+    OSStatus status;
+    status = SecItemAdd((__bridge CFDictionaryRef)setQuery, NULL);
+    
+    // if we have the object, release it.
+    if (sacObject) {
+        CFRelease(sacObject);
+        sacObject = NULL;
+    }
+    // if it failed to add the item.
+    if (status == errSecDecode) {
+        [self successWithBoolean: NO : command.callbackId];
+        return;
+    }
+    
+    status = SecItemCopyMatching((__bridge CFDictionaryRef)query, NULL);
+    
+    // it managed to retrieve data successfully
+    if (status == errSecSuccess) {
+        [self successWithBoolean: YES : command.callbackId];
+        return;
+    }
+    
+    // not sure what happened, returning unknown
+    [self successWithBoolean: NO : command.callbackId];
+    return;
+}
+
+-(void)successWithBoolean:(BOOL)val : (NSString *)callbackId
+{
+    CDVPluginResult *commandResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:val];
+    [self.commandDelegate sendPluginResult:commandResult callbackId:callbackId];
 }
 
 -(void)successWithMessage:(NSString *)message : (NSString *)callbackId
