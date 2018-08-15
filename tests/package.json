@@ -1,20 +1,10 @@
 {
-  "name": "cordova-plugin-secure-storage",
-  "version": "2.6.8",
-  "description": "Secure storage plugin for iOS & Android",
+  "name": "cordova-plugin-secure-storage-tests",
+  "version": "1.0.0",
+  "description": "Tests for cordova-plugin-secure-storage",
   "author": "Yiorgis Gozadinos <ggozad@crypho.com>",
-  "contributors": [
-    {
-      "name": "Demetris Manikas",
-      "email": "demetris.manikas@gmail.com"
-    },
-    {
-      "name": "Sergey Grebnov",
-      "email": "sergei.grebnov@gmail.com"
-    }
-  ],
   "cordova": {
-    "id": "cordova-plugin-secure-storage",
+    "id": "cordova-plugin-secure-storage-tests",
     "platforms": [
       "android",
       "ios",
@@ -22,19 +12,6 @@
       "windows"
     ]
   },
-  "keywords": [
-    "cordova",
-    "security",
-    "encryption",
-    "storage",
-    "ecosystem:cordova",
-    "cordova-android",
-    "cordova-ios",
-    "cordova-wp8",
-    "cordova-windows",
-    "cordova-browser"
-  ],
-  "main": "www/securestorage.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/crypho/cordova-plugin-secure-storage.git"

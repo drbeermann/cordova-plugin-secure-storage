@@ -2,7 +2,7 @@
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
     xmlns:android="http://schemas.android.com/apk/res/android"
     id="cordova-plugin-secure-storage"
-    version="2.3.0">
+    version="2.6.8">
 
     <name>SecureStorage</name>
     <author>Crypho AS</author>
@@ -36,10 +36,12 @@
         <source-file src="src/ios/SecureStorage.m" />
         <header-file src="src/ios/SecureStorage.h" />
 
-        <source-file src="src/ios/SSKeychain/SSKeychain.m" />
-        <header-file src="src/ios/SSKeychain/SSKeychain.h" />
-        <source-file src="src/ios/SSKeychain/SSKeychainQuery.m" />
-        <header-file src="src/ios/SSKeychain/SSKeychainQuery.h" />
+        <source-file src="src/ios/SAMKeychain/SAMKeychain.m" />
+        <header-file src="src/ios/SAMKeychain/SAMKeychain.h" />
+        <source-file src="src/ios/SAMKeychain/SAMKeychainQuery.m" />
+        <header-file src="src/ios/SAMKeychain/SAMKeychainQuery.h" />
+
+        <resource-file src="src/ios/SAMKeychain/SAMKeychain.bundle" />
 
         <framework src="Security.framework" />
 
@@ -55,6 +57,7 @@
         <source-file src="src/android/SecureStorage.java" target-dir="src/com/crypho/plugins/" />
         <source-file src="src/android/RSA.java" target-dir="src/com/crypho/plugins/" />
         <source-file src="src/android/AES.java" target-dir="src/com/crypho/plugins/" />
+        <source-file src="src/android/SharedPreferencesHandler.java" target-dir="src/com/crypho/plugins/" />
     </platform>
 
     <platform name="browser">
@@ -63,6 +66,12 @@
                 <param name="browser-package" value="SecureStorage" />
             </feature>
         </config-file>
+    </platform>
+
+    <platform name="windows">
+        <js-module src="src/windows/SecureStorage.js" name="SecureStorageWindowsImpl">
+            <runs />
+        </js-module>
     </platform>
 
 </plugin>
