@@ -1,11 +1,6 @@
-var SecureStorage, SecureStorageiOS, SecureStorageAndroid, SecureStorageWindows, SecureStorageBrowser;
-var sjcl_ss = cordova.require('cordova-plugin-secure-storage.sjcl_ss');
-var _AES_PARAM = {
-    ks: 256,
-    ts: 128,
-    mode: 'ccm',
-    cipher: 'aes'
-};
+var SecureStorage;
+
+var SUPPORTED_PLATFORMS = ['android', 'ios', 'windows'];
 
 var _checkCallbacks = function (success, error) {
     if (typeof success != 'function') {
@@ -19,30 +14,6 @@ var _checkCallbacks = function (success, error) {
 //Taken from undescore.js
 var _isString = function isString(x) {
     return Object.prototype.toString.call(x) === '[object String]';
-};
-
-var _checkIsString = function(value){
-    if (!_isString(value)) {
-        throw new Error('Value is not a String');
-    }
-};
-
-var _merge_options = function (defaults, options){
-    var res = {};
-    var attrname;
-
-    for (attrname in defaults) {
-        res[attrname] = defaults[attrname];
-    }
-    for (attrname in options) {
-        if (res.hasOwnProperty(attrname)) {
-            res[attrname] = options[attrname];
-        } else {
-            throw new Error('SecureStorage failure: invalid option ' + attrname);
-        }
-    }
-
-    return res;
 };
 
 /**
@@ -74,21 +45,21 @@ var _executeNativeMethod = function (success, error, nativeMethodName, args) {
     cordova.exec(success, fail, 'SecureStorage', nativeMethodName, args);
 };
 
-SecureStorageiOS = function (success, error, service) {
+SecureStorage = function (success, error, service, options) {
+    var platformId = cordova.platformId;
+    var opts = options && options[platformId] ? options[platformId] : {};
+
     this.service = service;
+
     try {
-        _executeNativeMethod(
-            success,
-            error,
-            'init',
-            [this.service]
-        );
+        _executeNativeMethod(success, error, 'init', [this.service, opts]);
     } catch (e) {
         error(e);
     }
     return this;
 };
 
+<<<<<<< HEAD
 SecureStorageiOS.prototype = {
 
     init: function(success, error) {
@@ -96,8 +67,14 @@ SecureStorageiOS.prototype = {
         setTimeout(success, 0);
     },
 
+=======
+SecureStorage.prototype = {
+>>>>>>> 9bddaeaad683741ac260f39f8e3b1251ccb5179d
     get: function (success, error, key) {
         try {
+            if (!_isString(key)) {
+                throw new Error('Key must be a string');
+            }
             _executeNativeMethod(success, error, 'get', [this.service, key]);
         } catch (e) {
             error(e);
@@ -106,7 +83,9 @@ SecureStorageiOS.prototype = {
 
     set: function (success, error, key, value) {
         try {
-            _checkIsString(value);
+            if (!_isString(value)) {
+                throw new Error('Value must be a string');
+            }
             _executeNativeMethod(success, error, 'set', [this.service, key, value]);
         } catch (e) {
             error(e);
@@ -115,6 +94,9 @@ SecureStorageiOS.prototype = {
 
     remove: function (success, error, key) {
         try {
+            if (!_isString(key)) {
+                throw new Error('Key must be a string');
+            }
             _executeNativeMethod(success, error, 'remove', [this.service, key]);
         } catch (e) {
             error(e);
@@ -148,6 +130,7 @@ SecureStorageiOS.prototype = {
     }
 };
 
+<<<<<<< HEAD
 // SecureStorage for Windows web interface and proxy parameters are the same as on iOS
 // so we don't create own definition for Windows and simply re-use iOS
 SecureStorageWindows = function (success, error, service) {
@@ -613,6 +596,12 @@ SecureStorageBrowser.prototype = {
                 }
             }
             success();
+=======
+if (cordova.platformId === 'android') {
+    SecureStorage.prototype.secureDevice = function (success, error) {
+        try {
+            _executeNativeMethod(success, error, 'secureDevice', []);
+>>>>>>> 9bddaeaad683741ac260f39f8e3b1251ccb5179d
         } catch (e) {
             error(e);
         }
@@ -622,23 +611,6 @@ SecureStorageBrowser.prototype = {
 
         success(true);
     }
-};
-
-switch (cordova.platformId) {
-case 'ios':
-    SecureStorage = SecureStorageiOS;
-    break;
-case 'android':
-    SecureStorage = SecureStorageAndroid;
-    break;
-case 'windows':
-    SecureStorage = SecureStorageWindows;
-    break;
-case 'browser':
-    SecureStorage = SecureStorageBrowser;
-    break;
-default:
-    SecureStorage = null;
 }
 
 if (!cordova.plugins) {
@@ -649,6 +621,6 @@ if (!cordova.plugins.SecureStorage) {
     cordova.plugins.SecureStorage = SecureStorage;
 }
 
-if (typeof module != 'undefined' && module.exports) {
+if (typeof module !== 'undefined' && module.exports) {
     module.exports = SecureStorage;
 }
