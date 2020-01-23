@@ -43,9 +43,6 @@
     }
 }
 
-NSString * const UIDevicePasscodeKeychainService = @"UIDevice-PasscodeStatus_KeychainService";
-NSString * const UIDevicePasscodeKeychainAccount = @"UIDevice-PasscodeStatus_KeychainAccount";
-
 - (void)get:(CDVInvokedUrlCommand*)command
 {
     NSString *service = [command argumentAtIndex:0];
@@ -168,7 +165,16 @@ NSString * const UIDevicePasscodeKeychainAccount = @"UIDevice-PasscodeStatus_Key
 - (void) isKeyguardSecure:(CDVInvokedUrlCommand*)command
 {
     LAContext* context = [[LAContext alloc] init];
-    [self successWithBoolean: [context canEvaluatePolicy:LAPolicyDeviceOwnerAuthentication error:nil] : command.callbackId];
+    NSError* authError = nil;
+    [self successWithBoolean: [context canEvaluatePolicy:LAPolicyDeviceOwnerAuthentication error:&authError] : command.callbackId];
+    
+    if (authError != nil) {
+        
+        NSLog(@"There was an error determining if the passcode policy can be evaluated: %@", [authError localizedDescription]);
+    }
+    else {
+        NSLog(@"The passcode policy can be evaluated.");
+    }
     return ;
 }
 
